@@ -1,0 +1,13 @@
+# CodingCoffee  qemu bmc , more courses : http://www.codingcoffee.org
+tasks:
+  - init: init: >
+    mkdir build
+    cd build
+    ../configure  
+    echo ' qemu bmc ' # runs during prebuild
+    command: make
+
+# CodingCoffee  qemu bmc,  more courses : http://www.codingcoffee.org
+ports:
+  - port: 3000
+    onOpen: open-preview
