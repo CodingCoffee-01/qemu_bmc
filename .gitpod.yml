@@ -1,19 +1,10 @@
 # CodingCoffee  qemu bmc , more courses : http://www.codingcoffee.org
 tasks:
-<<<<<<< HEAD
-  - init: init: >
+  - init: >
     mkdir build &&
     cd build    &&
     ../configure
   command: make
-=======
-  - init: >
-    mkdir build
-    cd build
-    ../configure  
-    echo ' qemu bmc ' # runs during prebuild
-    command: make
->>>>>>> 92bf41bc40576e3b402d39e395fb699a77a1bedb
 
 # CodingCoffee  qemu bmc,  more courses : http://www.codingcoffee.org
 ports:
