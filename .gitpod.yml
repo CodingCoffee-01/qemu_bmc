@@ -2,8 +2,9 @@
 tasks:
   - init: >
     mkdir build &&
-    cd build    && ../configure
-  command: make
+    cd build    && 
+    ../configure &&
+    make
 
 # CodingCoffee  qemu bmc,  more courses : http://www.codingcoffee.org
 ports:
