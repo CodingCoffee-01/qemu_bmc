@@ -1,6 +1,6 @@
 # CodingCoffee  qemu bmc , more courses : http://www.codingcoffee.org
 tasks:
-  - init: init: >
+  - init: >
     mkdir build
     cd build
     ../configure  
