@@ -5,7 +5,6 @@ tasks:
     cd build    && 
     ../configure &&
     make
-
 # CodingCoffee  qemu bmc,  more courses : http://www.codingcoffee.org
 ports:
   - port: 3000
