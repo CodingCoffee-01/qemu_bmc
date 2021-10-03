@@ -509,11 +509,77 @@ static void ast2600_evb_i2c_init(AspeedMachineState *bmc)
 
 static void romulus_bmc_i2c_init(AspeedMachineState *bmc)
 {
+    static const struct {
+        unsigned gpio_id;
+        LEDColor color;
+        const char *description;
+        bool gpio_polarity;
+    } pca1_leds[] = {
+        {13, LED_COLOR_GREEN, "front-fault-4",  GPIO_POLARITY_ACTIVE_LOW},
+        {14, LED_COLOR_GREEN, "front-power-3",  GPIO_POLARITY_ACTIVE_LOW},
+        {15, LED_COLOR_GREEN, "front-id-5",     GPIO_POLARITY_ACTIVE_LOW},
+    };
     AspeedSoCState *soc = &bmc->soc;
+    uint8_t *eeprom_buf = g_malloc0(8 * 1024);
+    DeviceState *dev;
+    LEDState *led;
 
-    /* The romulus board expects Epson RX8900 I2C RTC but a ds1338 is
-     * good enough */
+   /*
+	CodingCoffee for OpenBMC Training Courses,more courses : https://www.codingcoffee.org 
+	I2c3 4 5 PCA9552 for led control and dps310 tmp423
+	DTS reference : aspeed-bmc-opp-witherspoon.dts
+   */
+
+
+    dev = DEVICE(i2c_slave_new(TYPE_PCA9552, 0x60));
+    qdev_prop_set_string(dev, "description", "pca1");
+    i2c_slave_realize_and_unref(I2C_SLAVE(dev),
+                                aspeed_i2c_get_bus(&soc->i2c, 3),
+                                &error_fatal);
+
+    for (size_t i = 0; i < ARRAY_SIZE(pca1_leds); i++) {
+        led = led_create_simple(OBJECT(bmc),
+                                pca1_leds[i].gpio_polarity,
+                                pca1_leds[i].color,
+                                pca1_leds[i].description);
+        qdev_connect_gpio_out(dev, pca1_leds[i].gpio_id,
+                              qdev_get_gpio_in(DEVICE(led), 0));
+    }
+    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 3), "dps310", 0x76);
+    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 4), "tmp423", 0x4c);
+    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 5), "tmp423", 0x4c);
+
+
+
+    /*
+       I2c11 RTC , eeprom and pca9552 i2c switch devices
+  
+       The romulus board expects Epson RX8900 I2C RTC but a ds1338 is
+       good enough
+    */
     i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 11), "ds1338", 0x32);
+
+    smbus_eeprom_init_one(aspeed_i2c_get_bus(&soc->i2c, 11), 0x51,eeprom_buf);
+
+    dev = DEVICE(i2c_slave_new(TYPE_PCA9552, 0x60));
+    qdev_prop_set_string(dev, "description", "pca0");
+    i2c_slave_realize_and_unref(I2C_SLAVE(dev),aspeed_i2c_get_bus(&soc->i2c, 11),&error_fatal);
+
+    /*
+       I2c12  temperature sensors
+       nuvoton,w83773g  and TMP105 compatible sensors
+    */
+    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 12), TYPE_TMP105,0x42);
+    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 12), TYPE_TMP105,0x46);
+    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 12), TYPE_TMP105,0x46);
+    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 12), TYPE_TMP105,0x46);
+    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 12), TYPE_TMP105,0x46);
+
+#if 0  //  Current QEMU didn't support w83773g  use tmp105 compatible to replace
+    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 12), "w83773g", 0x4c);
+    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 12), "w83773g", 0x4a);
+    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 12), "w83773g", 0x4e);
+#endif 
 }
 
 static void swift_bmc_i2c_init(AspeedMachineState *bmc)

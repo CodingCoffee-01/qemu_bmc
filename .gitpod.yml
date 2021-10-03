@@ -3,7 +3,7 @@ tasks:
   - init: >
     mkdir build &&
     cd build    && 
-    ../configure 
+    ../configure && make
 # CodingCoffee  qemu bmc,  more courses : http://www.codingcoffee.org
 ports:
   - port: 3000
