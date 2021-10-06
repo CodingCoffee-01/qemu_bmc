@@ -689,12 +689,29 @@ static void witherspoon_bmc_i2c_init(AspeedMachineState *bmc)
                               qdev_get_gpio_in(DEVICE(led), 0));
     }
     i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 3), "dps310", 0x76);
-    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 4), "tmp423", 0x4c);
-    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 5), "tmp423", 0x4c);
+    //i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 4), "tmp423", 0x4c);
+
+    /* add a TMP423 temperature sensor */
+    dev = DEVICE(i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 4),
+                                         "tmp423", 0x4c));
+    object_property_set_int(OBJECT(dev), "temperature0", 31000, &error_abort);
+    object_property_set_int(OBJECT(dev), "temperature1", 28000, &error_abort);
+    object_property_set_int(OBJECT(dev), "temperature2", 20000, &error_abort);
+    object_property_set_int(OBJECT(dev), "temperature3", 110000, &error_abort);
+
+
+    //i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 5), "tmp423", 0x4c);
+    /* add a TMP423 temperature sensor */
+    dev = DEVICE(i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 5),
+                                         "tmp423", 0x4c));
+    object_property_set_int(OBJECT(dev), "temperature0", 31000, &error_abort);
+    object_property_set_int(OBJECT(dev), "temperature1", 28000, &error_abort);
+    object_property_set_int(OBJECT(dev), "temperature2", 20000, &error_abort);
+    object_property_set_int(OBJECT(dev), "temperature3", 110000, &error_abort);
+
 
     /* The Witherspoon expects a TMP275 but a TMP105 is compatible */
-    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 9), TYPE_TMP105,
-                     0x4a);
+    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 9), TYPE_TMP105,0x4a);
 
     /* The witherspoon board expects Epson RX8900 I2C RTC but a ds1338 is
      * good enough */
@@ -708,6 +725,24 @@ static void witherspoon_bmc_i2c_init(AspeedMachineState *bmc)
                                 aspeed_i2c_get_bus(&soc->i2c, 11),
                                 &error_fatal);
     /* Bus 11: TODO ucd90160@64 */
+
+    /* Bus 12:  */ 
+
+   /*
+       I2c12  temperature sensors
+       nuvoton,w83773g  and TMP105 compatible sensors
+    */
+    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 12), TYPE_TMP105,0x42);
+    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 12), TYPE_TMP105,0x46);
+    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 12), TYPE_TMP105,0x4a);
+    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 12), TYPE_TMP105,0x4c);
+    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 12), TYPE_TMP105,0x4e);
+
+   #if 0  //  Current QEMU didn't support w83773g  use tmp105 compatible to replace
+    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 12), "w83773g", 0x4c);
+    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 12), "w83773g", 0x4a);
+    i2c_slave_create_simple(aspeed_i2c_get_bus(&soc->i2c, 12), "w83773g", 0x4e);
+  #endif
 }
 
 static void g220a_bmc_i2c_init(AspeedMachineState *bmc)
