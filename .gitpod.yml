@@ -1,7 +1,7 @@
 # CodingCoffee  qemu bmc , more courses : http://www.codingcoffee.org
 tasks:
   - init: echo 'this is codingcoffee gitpod qemu from qemu.org ' # runs during prebuild
-    command: echo 'build hello.c and hello.cpp' && mkdir build && cd build && ../configure && make
+    command: mkdir build && cd build && ../configure && make
 # CodingCoffee  qemu bmc,  more courses : http://www.codingcoffee.org
 ports:
   - port: 3000
